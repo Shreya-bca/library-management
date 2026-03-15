@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Library LMS Dashboard (No DB) - QR Scanner</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- jQuery + html5-qrcode -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family:"Times New Roman", serif; }
+  body { display:flex; min-height:100vh; background:#e6f0fa; flex-direction:column; }
+
+  /* Sidebar */
+  .sidebar { width:250px; background:#0b4075; color:#fff; position:fixed; height:100%; padding-top:20px; display:flex; flex-direction:column; }
+  .sidebar h2 { text-align:center; margin-bottom:20px; font-size:18px; }
+  .sidebar a { color:#fff; padding:12px 18px; text-decoration:none; cursor:pointer; display:block; font-weight:600; }
+  .sidebar a:hover, .sidebar a.active { background:#c0392b; }
+
+  /* Header */
+  .header { position:fixed; left:250px; right:0; top:0; height:64px; background:#fff; border-bottom:1px solid #ddd; display:flex; align-items:center; justify-content:space-between; padding:0 24px; z-index:50; }
+  .header h1 { color:#12406e; font-size:20px; }
+  .header button { padding:8px 12px; background:#000; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; }
+  .header button:hover { background:#c0392b; }
+
+  /* Main */
+  .main { margin-left:250px; padding:90px 32px 40px 32px; flex:1; }
+  .section { display:none; }
+  .section.active { display:block; }
+
+  .cards { display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+  .card { background:#fff; padding:18px; border-radius:8px; flex:1 1 180px; box-shadow:0 4px 10px rgba(0,0,0,0.08); text-align:center; }
+  .card h3 { color:#12406e; margin-bottom:8px; }
+  .card p { font-weight:700; font-size:18px; }
+
+  .table-wrapper { background:transparent; margin-top:12px; overflow:auto; }
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 3px 8px rgba(0,0,0,0.08); }
+  table th, table td { padding:12px 14px; border-bottom:1px solid #eee; text-align:left; }
+  table th { background:#12406e; color:#fff; font-weight:700; }
+  table tr:hover { background:#f7f9fb; }
+
+  input, select, textarea, button { font-family:inherit; }
+  input, select, textarea { width:100%; padding:8px 10px; margin:8px 0; border-radius:6px; border:1px solid #cfcfcf; }
+  .btn { display:inline-block; padding:8px 12px; background:#12406e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; }
+  .btn:hover { background:#c0392b; }
+
+  .footer { margin-top:auto; background:#12406e; color:#fff; padding:12px; text-align:center; font-weight:700; }
+
+  /* Modal */
+ /* .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:200; }
+  .modal .card { width:360px; text-align:center; }
+    /* Logout Modal */
+        .modal {display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.5); justify-content:center; align-items:center;}
+        .modal-content {background-color:#01355c; padding:30px; border-radius:10px; text-align:center; width:350px; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+        .modal-content h2 {margin-bottom:15px;}
+        .modal-content p {margin-bottom:20px;}
+        .modal-content button {background:#e74c3c; border:none; color:#fff; padding:10px 18px; border-radius:6px; cursor:pointer; font-size:16px;}
+        .modal-content button:hover {background:#c0392b;}
+        .modal-content .cancel-btn {background:#3498db; margin-left:10px;}
+        .modal-content .cancel-btn:hover {background:#2980b9;}
+
+
+  /* small helpers */
+  .flex { display:flex; gap:12px; align-items:center; }
+  .small { font-size:13px; color:#555; }
+  .right { text-align:right; }
+  .muted { color:#666; }
+
+  /* Manage section scanner box */
+  #reader { width:320px; height:320px; border-radius:8px; border:2px solid #12406e; background:#fff; display:block; }
+  @media (max-width:900px){ .header { left:0; width:100%; } .sidebar{ display:none;} .main{ margin-left:0; padding:110px 12px 20px; } }
+</style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Library Management</h2>
+    <a class="nav active" data-target="dashboard">Dashboard</a>
+    <a class="nav" data-target="search">Search Books</a>
+    <a class="nav" data-target="issue">Issue Book</a>
+    <a class="nav" data-target="return">Return Book</a>
+    <a class="nav" data-target="manage">Manage Books</a>
+    <a class="nav" data-target="reports">Reports</a>
+    <a class="nav" data-target="users">User Management</a>
+    <a id="logoutSidebar">Logout</a>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Welcome to Our Library</h1>
+    <div>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Dashboard -->
+    <section id="dashboard" class="section active">
+      <div class="cards">
+        <div class="card"><h3>Total Books</h3><p id="totalBooks">0</p></div>
+        <div class="card"><h3>Books Issued</h3><p id="booksIssuedToday">0</p></div>
+        <div class="card"><h3>Overdue Books</h3><p id="overdueBooks">0</p></div>
+        <div class="card"><h3>Total Students</h3><p id="totalStudents">120</p></div>
+      </div>
+
+      <h2 style="margin:12px 0 8px 0">Recent Book Issues</h2>
+      <div class="table-wrapper">
+        <table id="recentTable">
+          <thead>
+            <tr><th>Student Name</th><th>Book Title</th><th>Issue Date</th><th>Return Date</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2 style="margin:18px 0 8px 0">Overdue & Fines</h2>
+      <div class="table-wrapper">
+        <table id="fineTable">
+          <thead>
+            <tr><th>Student</th><th>Book</th><th>Issue Date</th><th>Days Overdue</th><th>Fine (₹)</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Search -->
+    <section id="search" class="section">
+      <h2>Search Books</h2>
+      <input id="searchInput" placeholder="Search by title or author..." />
+      <div class="table-wrapper">
+        <table id="searchResults">
+          <thead><tr><th>Book Title</th><th>Author</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Issue -->
+    <section id="issue" class="section">
+      <h2>Issue Book</h2>
+      <label>Student Name</label>
+      <input id="studentName" placeholder="Enter student name" />
+      <label>Select Book</label>
+      <select id="bookSelect"></select>
+      <div style="margin-top:8px;"><button id="issueBookBtn" class="btn">Issue Book</button></div>
+    </section>
+
+    <!-- Return -->
+    <section id="return" class="section">
+      <h2>Return Book</h2>
+      <label>Student Name</label>
+      <input id="returnStudent" placeholder="Enter student name" />
+      <label>Select Book (issued)</label>
+      <select id="returnSelect"></select>
+      <div style="margin-top:8px;"><button id="returnBookBtn" class="btn">Return Book</button></div>
+    </section>
+
+    <!-- Manage -->
+    <section id="manage" class="section">
+      <h2>Manage Books</h2>
+
+      <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+        <div>
+          <h3>📷 Scan Book QR</h3>
+          <div id="reader"></div>
+          <p class="small muted">Scanned: <span id="scannedResult">None</span></p>
+        </div>
+
+        <div style="flex:1; min-width:260px;">
+          <label>Book Title</label>
+          <input id="newBookTitle" placeholder="Book Title (or scanned)" />
+          <label>Author</label>
+          <input id="newBookAuthor" placeholder="Author" />
+          <label>Access No</label>
+          <input id="newBookAccessNo" placeholder="Access Number" />
+          <div style="margin-top:8px;">
+            <button id="addBookBtn" class="btn">Add Book</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:18px">All Books</h3>
+      <div class="table-wrapper">
+        <table id="booksTable">
+          <thead><tr><th>Title</th><th>Author</th><th>Access No</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Reports -->
+    <section id="reports" class="section">
+      <h2>Reports</h2>
+      <p>Total Books Issued This Month: <b id="issuedThisMonth">0</b></p>
+      <p>Overdue Books: <b id="overdueCount">0</b></p>
+    </section>
+
+    <!-- Users -->
+    <section id="users" class="section">
+      <h2>User Management</h2>
+      <form id="userForm" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end;">
+        <input id="u_name" placeholder="Full name" required />
+        <input id="u_college" placeholder="College ID" required />
+        <input id="u_phone" placeholder="Phone (10 digits)" pattern="[0-9]{10}" />
+        <select id="u_role"><option value="">Select role</option><option>Student</option><option>Staff</option><option>Admin</option></select>
+        <div style="grid-column:span 2; text-align:left;"><button type="submit" class="btn">Add User</button></div>
+      </form>
+
+      <div class="table-wrapper" style="margin-top:12px;">
+        <table id="userTable">
+          <thead><tr><th>Name</th><th>College ID</th><th>Phone</th><th>Role</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">Global Institute of Information Technology | Library LMS</div>
+
+  <!-- Logout Modal -->
+ <!-- Logout Modal -->
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Logout Confirmation</h2>
+            <p>Are you sure you want to logout?</p>
+            <button id="confirmLogout">Yes, Logout</button>
+            <button class="cancel-btn" id="cancelLogout">Cancel</button>
+        </div>
+    </div>
+
+
+
+<script>
+/* ---------------------------
+  Library LMS - No DB Single File
+   - QR scanner uses html5-qrcode
+   - All data is in-memory, optionally stored to localStorage
+---------------------------- */
+
+$(function(){
+  // --- Initial Data (can be persisted to localStorage) ---
+  const defaultBooks = [
+    { title:"Java Programming", author:"John Doe", accessNo:"A001", status:"Available" },
+    { title:"Python Basics", author:"Jane Doe", accessNo:"A002", status:"Available" },
+    { title:"Data Structures", author:"Kamna", accessNo:"A003", status:"Available" },
+    { title:"C++ Fundamentals", author:"Ravi", accessNo:"A004", status:"Available" },
+    { title:"Web Development", author:"Neha", accessNo:"A005", status:"Available" }
+  ];
+
+  // Load from localStorage if exists
+  const storageKey = 'lms_data_v1';
+  let state = { books: defaultBooks.slice(), users:[], recentIssues:[] };
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if(raw){ state = JSON.parse(raw); }
+  } catch(e){ console.warn('localStorage read error', e); }
+
+  // Save helper
+  function saveState(){ try{ localStorage.setItem(storageKey, JSON.stringify(state)); } catch(e){ /* ignore */ } }
+
+  // DOM refs
+  const $nav = $('.nav');
+  const $sections = $('.section');
+  const $booksTable = $('#booksTable tbody');
+  const $searchResults = $('#searchResults tbody');
+  const $bookSelect = $('#bookSelect');
+  const $returnSelect = $('#returnSelect');
+  const $recentTable = $('#recentTable tbody');
+  const $fineTable = $('#fineTable tbody');
+  const $issuedThisMonth = $('#issuedThisMonth');
+  const $overdueCount = $('#overdueCount'); // in reports
+  const finePerDay = 5; // ₹5 per day after 7 days
+
+  // Navigation
+  $nav.on('click', function(){
+    $nav.removeClass('active');
+    $(this).addClass('active');
+    const t = $(this).data('target');
+    $sections.removeClass('active');
+    $('#'+t).addClass('active');
+    if(t === 'manage') { startScannerIfHidden(); } // ensure scanner active when needed
+  });
+
+  // Logout modal
+  function showLogoutModal() {
+                $("#logoutModal").css("display", "flex");
+            }
+
+            function hideLogoutModal() {
+                $("#logoutModal").css("display", "none");
+            }
+
+            $("#logoutBtn, #logoutSidebar").click(showLogoutModal);
+            $("#cancelLogout").click(hideLogoutModal);
+            $("#confirmLogout").click(function () {
+                localStorage.removeItem("loggedInUser");
+                window.location.href = "cover.html";
+            });
+
+
+  // Utility: format date for display and standardized ISO for storage
+  function todayISO(){ return new Date().toISOString(); }
+  function formatDate(iso){ if(!iso) return '--'; const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString(); }
+  function parseISO(iso){ return new Date(iso); }
+
+  // Populate UI
+  function renderBooksTable(){
+    $booksTable.empty();
+    state.books.forEach(b=>{
+      $booksTable.append(`<tr>
+        <td>${escapeHtml(b.title)}</td>
+        <td>${escapeHtml(b.author)}</td>
+        <td>${escapeHtml(b.accessNo||'--')}</td>
+        <td>${b.status}</td>
+      </tr>`);
+    });
+  }
+
+  function populateSelects(){
+    $bookSelect.empty();
+    $returnSelect.empty();
+    state.books.forEach(b=>{
+      if(b.status === 'Available'){
+        $bookSelect.append(`<option value="${escapeAttr(b.accessNo)}">${escapeHtml(b.title)} (${escapeHtml(b.accessNo)})</option>`);
+      }
+      if(b.status === 'Issued'){
+        $returnSelect.append(`<option value="${escapeAttr(b.accessNo)}">${escapeHtml(b.title)} (${escapeHtml(b.accessNo)})</option>`);
+      }
+    });
+    // Also update search results initially
+    renderSearch('');
+  }
+
+  function renderSearch(q){
+    const ql = (q||'').toLowerCase();
+    $searchResults.empty();
+    state.books.filter(b=> !ql || b.title.toLowerCase().includes(ql) || b.author.toLowerCase().includes(ql))
+      .forEach(b=>{
+        $searchResults.append(`<tr><td>${escapeHtml(b.title)}</td><td>${escapeHtml(b.author)}</td><td>${b.status}</td></tr>`);
+      });
+  }
+
+  function renderUsers(){
+    const $body = $('#userTable tbody').empty();
+    state.users.forEach((u, idx)=>{
+      const tr = $(`<tr>
+        <td>${escapeHtml(u.name)}</td>
+        <td>${escapeHtml(u.collegeId)}</td>
+        <td>${escapeHtml(u.phone||'--')}</td>
+        <td>${escapeHtml(u.role||'')}</td>
+        <td>
+          <button class="editUser" data-i="${idx}">Edit</button>
+          <button class="deleteUser" data-i="${idx}">Delete</button>
+        </td>
+      </tr>`);
+      $body.append(tr);
+    });
+    // attach handlers
+    $body.find('.deleteUser').on('click', function(){ const i = +$(this).data('i'); state.users.splice(i,1); saveState(); renderUsers(); });
+    $body.find('.editUser').on('click', function(){
+      const i = +$(this).data('i'); const u = state.users[i];
+      $('#u_name').val(u.name); $('#u_college').val(u.collegeId); $('#u_phone').val(u.phone); $('#u_role').val(u.role);
+      // remove existing then re-add on submit
+      state.users.splice(i,1); saveState();
+    });
+  }
+
+  // Recent issues & fines
+  function renderRecentAndFines(){
+    $recentTable.empty();
+    $fineTable.empty();
+    const today = new Date();
+    let overdueCount = 0;
+
+    state.recentIssues.forEach(rec=>{
+      $recentTable.append(`<tr>
+        <td>${escapeHtml(rec.student)}</td>
+        <td>${escapeHtml(rec.title)}</td>
+        <td>${formatDate(rec.issueDate)}</td>
+        <td>${rec.returnDate ? formatDate(rec.returnDate) : '--'}</td>
+      </tr>`);
+
+      if(rec.status === 'Issued'){
+        const diffDays = Math.floor((today - parseISO(rec.issueDate)) / (1000*60*60*24));
+        if(diffDays > 7){
+          overdueCount++;
+          const late = diffDays - 7;
+          const fine = late * finePerDay;
+          $fineTable.append(`<tr>
+            <td>${escapeHtml(rec.student)}</td>
+            <td>${escapeHtml(rec.title)}</td>
+            <td>${formatDate(rec.issueDate)}</td>
+            <td>${late}</td>
+            <td>₹${fine}</td>
+          </tr>`);
+        }
+      }
+    });
+
+    $('#totalBooks').text(state.books.length);
+    $('#booksIssuedToday').text(state.recentIssues.filter(r=>r.status==='Issued').length);
+    $('#overdueBooks').text(overdueCount);
+    $('#issuedThisMonth').text(state.recentIssues.length);
+    $('#overdueCount').text(overdueCount);
+    $('#overdueCount').text(overdueCount);
+    $('#overdueBooks').text(overdueCount);
+  }
+
+  // Escape helpers
+  function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>"']/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  // initial render
+  function refreshAll(){ renderBooksTable(); populateSelects(); renderRecentAndFines(); renderUsers(); saveState(); }
+  refreshAll();
+
+  // Search input
+  $('#searchInput').on('input', function(){ renderSearch($(this).val()); });
+
+  // Add Book (manual)
+  $('#addBookBtn').on('click', function(){
+    const t = $('#newBookTitle').val().trim();
+    const a = $('#newBookAuthor').val().trim();
+    const acc = $('#newBookAccessNo').val().trim() || ('A'+(state.books.length+100));
+    if(!t || !a){ alert('Please provide book title and author'); return; }
+    state.books.push({ title:t, author:a, accessNo:acc, status:'Available' });
+    $('#newBookTitle').val(''); $('#newBookAuthor').val(''); $('#newBookAccessNo').val('');
+    refreshAll();
+    alert('Book added successfully');
+  });
+
+  // Issue Book
+  $('#issueBookBtn').on('click', function(){
+    const student = $('#studentName').val().trim();
+    const access = $('#bookSelect').val();
+    if(!student || !access){ alert('Please enter student name and select a book'); return; }
+    const book = state.books.find(b=>b.accessNo === access);
+    if(!book || book.status !== 'Available'){ alert('Selected book not available'); return; }
+
+    book.status = 'Issued';
+    const rec = { student, title:book.title, accessNo:book.accessNo, issueDate: todayISO(), returnDate:null, status:'Issued' };
+    state.recentIssues.push(rec);
+    $('#studentName').val('');
+    refreshAll();
+    alert('Book issued successfully');
+  });
+
+  // Return Book
+  $('#returnBookBtn').on('click', function(){
+    const student = $('#returnStudent').val().trim();
+    const access = $('#returnSelect').val();
+    if(!student || !access){ alert('Please enter student name and select a book to return'); return; }
+    const book = state.books.find(b=>b.accessNo === access);
+    if(!book || book.status !== 'Issued'){ alert('Selected book is not currently issued'); return; }
+
+    // find the issue record
+    const rec = state.recentIssues.find(r => r.accessNo===access && r.status==='Issued');
+    if(rec){
+      rec.status = 'Returned';
+      rec.returnDate = todayISO();
+    }
+    book.status = 'Available';
+    $('#returnStudent').val('');
+    refreshAll();
+    alert('Book returned successfully');
+  });
+
+  // User form
+  $('#userForm').on('submit', function(e){
+    e.preventDefault();
+    const uname = $('#u_name').val().trim();
+    const ucol = $('#u_college').val().trim();
+    const uphone = $('#u_phone').val().trim();
+    const urole = $('#u_role').val();
+    if(!uname || !ucol){ alert('Please fill name and college id'); return; }
+    state.users.push({ name:uname, collegeId:ucol, phone:uphone, role:urole });
+    $('#userForm')[0].reset();
+    refreshAll();
+  });
+
+  // Books table initial population done in refreshAll
+
+  // QR Scanner (html5-qrcode)
+  let qrScanner = null;
+  let scannerRunning = false;
+  function startScannerIfHidden(){
+    if(scannerRunning) return;
+    // create scanner object
+    try {
+      qrScanner = new Html5QrcodeScanner("reader", { fps: 8, qrbox: 250 }, /* verbose= */ false);
+      qrScanner.render(onScanSuccess, onScanFailure);
+      scannerRunning = true;
+    } catch(err){
+      console.warn('QR init err', err);
+    }
+  }
+  function onScanSuccess(decodedText, decodedResult){
+    // show scanned string
+    $('#scannedResult').text(decodedText);
+    // accept data format: Title | Author | AccessNo  (pipe-separated)
+    const parts = decodedText.split('|').map(p=>p.trim());
+    if(parts.length === 3){
+      $('#newBookTitle').val(parts[0]);
+      $('#newBookAuthor').val(parts[1]);
+      $('#newBookAccessNo').val(parts[2]);
+    } else {
+      // If scanned a URL, strip protocol and use remainder as text
+      if(/^https?:\/\//i.test(decodedText)){
+        const cleaned = decodedText.replace(/^https?:\/\//i,'');
+        $('#scannedResult').text(cleaned);
+      } else {
+        // If format not match, still show but ask user
+        // (Don't auto-add)
+      }
+    }
+  }
+  function onScanFailure(error){
+    // Do nothing or print to console — frequent
+    // console.warn('scan failure', error);
+  }
+  // start scanner immediately in background for better UX
+  startScannerIfHidden();
+
+  // Helper: keyboard shortcut to focus search
+  $(document).on('keydown', function(e){ if(e.key === '/' && !$(e.target).is('input,textarea')){ e.preventDefault(); $('#searchInput').focus(); } });
+
+  // simple escape for user input used above
+
+  // Small UI housekeeping
+  // When state changes, repopulate all selectors and tables
+  // Already handled via refreshAll calls above
+
+  // Expose an explicit "refresh" button (optional) - not rendered but handy in console
+  window.lms_refresh = refreshAll;
+
+  // make selects populated initially
+  populateSelects();
+
+  // Also re-render when tabs switch to dashboard (to show latest highlights)
+  $nav.on('click', function(){
+    if($(this).data('target') === 'dashboard'){ renderRecentAndFines(); }
+  });
+
+  /* Utility: ensure selects are up-to-date every time state changes */
+  function refreshAll(){ renderBooksTable(); populateSelects(); renderRecentAndFines(); renderUsers(); saveState(); }
+
+  // initial refresh
+  refreshAll();
+});
+</script>
+</body>
+</html>

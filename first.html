@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f9;
+        }
+
+        /* Header/Navbar */
+        header {
+            background: #12406e;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 10px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 20px;
+            padding: 8px 16px;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            background: white;
+            color: #12406e;
+            border-radius: 5px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 250px 20px;
+            background: url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600') no-repeat center center/cover;
+            color: rgb(0, 0, 0);
+        }
+        .hero h1 {
+            font-size: 60px;
+            margin-bottom: 20px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+        .hero p {
+            font-size: 30px;
+            color: rgb(0, 0, 0);
+        }
+
+        /* About Section */
+        .about {
+            padding: 60px 20px;
+            text-align: center;
+            background: #fff;
+            font-size: 21px;
+        }
+        .about h2 {
+            margin-bottom: 20px;
+            color: #12406e;
+        }
+        .about p {
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.5;
+            font-size: 25px;
+        }
+
+        /* Features Section */
+        .features {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            padding: 60px 20px;
+            background: #f9f9f9;
+        }
+        .feature-card {
+            background: #b9d1ea;
+            padding: 30px;
+            margin: 15px;
+            width: 200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .feature-card h2 {
+            margin-bottom: 10px;
+            color: #12406e;
+        }
+
+        /* Login Button */
+        .login-btn {
+            display: inline-block;
+            margin: 40px auto;
+            padding: 12px 30px;
+            background: #12406e;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-btn:hover {
+            background: darkred;
+        }
+
+        /* Footer */
+        footer {
+            background: #12406e;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+        <h1>Library Management System</h1>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <a href="second.html">Login</a> <!-- Changed here -->
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Welcome to Our Library</h1>
+        <p>Your gateway to knowledge and learning!</p>
+        <!-- Centered Login Button under hero -->
+        <button class="login-btn" onclick="window.location.href='second.html'">Go to Login Page</button>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <h2>About Our Library</h2>
+        <p>
+           "Our library offers a wide range of books and resources to support learning and research. It aims to make information easily accessible to everyone."
+        </p>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <h2>View Books</h2>
+            <p>Browse the complete collection of available books in the library.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Issue Book</h2>
+            <p>Borrow your desired book by issuing it through the system.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Return Book</h2>
+            <p>Easily return the borrowed books on time.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Membership</h2>
+            <p>Register as a member to enjoy full access to library services.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Contact us: info@Our.com |</p>
+        <p>&copy; 2025 Our Library. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

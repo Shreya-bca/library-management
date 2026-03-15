@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library Login</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef2f3;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-box {
+            width: 380px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            margin: 80px auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        label {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 18px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #007bff;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .signup-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+        <h2>Library Login</h2>
+
+        <label>Phone Number</label>
+        <input type="text" id="phone" placeholder="Enter 10-digit phone number">
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter your email">
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+
+        <button id="loginBtn">Login</button>
+
+        <div class="signup-link">
+            Don't have an account? <a href="signup.html">Sign Up</a>
+        </div>
+    </div>
+
+    <script>
+        $("#loginBtn").click(function () {
+
+            let phone = $("#phone").val().trim();
+            let email = $("#email").val().trim();
+            let pass = $("#password").val().trim();
+
+            // Phone validation
+            if (phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
+                alert("Phone number must be exactly 10 digits!");
+                return;
+            }
+
+            if (email === "") {
+                alert("Email is required!");
+                return;
+            }
+
+            if (pass === "") {
+                alert("Password is required!");
+                return;
+            }
+
+            // Successful login
+            alert("Login Successful!");
+
+            // Redirect to home page
+            window.location.href = "Dashboard.html"; // change to your page
+        });
+    </script>
+
+</body>
+</html>
