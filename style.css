@@ -1,0 +1,87 @@
+/* General styling */
+body {
+  font-family: "Times New Roman", serif;
+  margin: 20px;
+  padding: 20px;
+  text-align: center;
+  background: #e0f7f1; /* Pastel blue background */
+  border: 8px solid black;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+h1 {
+  font-size: 50px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+h2 {
+  font-size: 25px;
+  margin-top: 0;
+  font-style: italic;
+}
+
+.section {
+  margin: 20px 0;
+  font-size: 20px;
+}
+
+.footer {
+  margin-top: 40px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.btn {
+  margin-top: 30px;
+  padding: 12px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: darkred;
+}
+
+/* Images responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive design for phones */
+@media (max-width: 768px) {
+  body {
+    margin: 10px;
+    padding: 10px;
+    border: 4px solid black;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  h2 {
+    font-size: 18px;
+  }
+  .section {
+    font-size: 16px;
+  }
+  .footer {
+    font-size: 14px;
+  }
+  .btn {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+  img {
+    width: 80px; /* logo smaller on phone */
+  }
+}
