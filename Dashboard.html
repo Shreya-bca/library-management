@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <link rel="stylesheet" href="style.css">
 <meta charset="utf-8" />
+
 <title>Library LMS Dashboard (No DB) - QR Scanner</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <!-- jQuery + html5-qrcode -->
@@ -552,6 +551,12 @@ $(function(){
 
   // initial refresh
   refreshAll();
+});
+// Mobile pe click karte hi sidebar band ho
+$('.nav').click(function(){
+  if(window.innerWidth < 900){
+    $('.sidebar').removeClass('show');
+  }
 });
 </script>
 </body>
