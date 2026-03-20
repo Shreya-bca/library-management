@@ -70,7 +70,81 @@
 
   /* Manage section scanner box */
   #reader { width:320px; height:320px; border-radius:8px; border:2px solid #12406e; background:#fff; display:block; }
-  @media (max-width:900px){ .header { left:0; width:100%; } .sidebar{ display:none;} .main{ margin-left:0; padding:110px 12px 20px; } }
+  #menuBtn{
+    display:none;
+    font-size:22px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    margin-right:10px;
+  }
+
+  /* Smooth UI */
+  .card{ transition:0.3s; }
+  .card:hover{ transform:translateY(-5px); }
+
+  .btn:hover{ transform:scale(1.05); }
+
+  .header{ box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+
+  /* Dark Mode */
+  .dark{ background:#121212; color:#fff; }
+  .dark .card{ background:#1e1e1e; }
+  .dark .sidebar{ background:#000; }
+  .dark table{ background:#1e1e1e; color:#fff; }
+  .dark input, .dark select{
+    background:#2a2a2a;
+    color:#fff;
+    border:1px solid #444;
+  }
+
+  /* Responsive QR */
+  #reader{
+    width:100%;
+    max-width:320px;
+    height:auto;
+  }
+
+  /* MOBILE FIX */
+  @media (max-width:900px){
+    #menuBtn{ display:block; }
+
+    .sidebar{
+      left:-250px;
+      position:fixed;
+      transition:0.3s;
+      z-index:999;
+    }
+
+    .sidebar.show{
+      left:0;
+    }
+
+    .header{
+      left:0;
+      width:100%;
+      padding:0 15px;
+    }
+
+    .main{
+      margin-left:0;
+      padding:110px 15px 20px;
+    }
+
+    .cards{
+      flex-direction:column;
+    }
+
+    table{
+      font-size:13px;
+    }
+
+    table th, table td{
+      padding:8px;
+    }
+  }
+
+
 </style>
 </head>
 
@@ -89,12 +163,15 @@
   </div>
 
   <!-- Header -->
-  <div class="header">
-    <h1>Welcome to Our Library</h1>
-    <div>
-      <button id="logoutBtn">Logout</button>
-    </div>
+ <div class="header">
+  <button id="menuBtn">☰</button>
+  <h1>Welcome to Our Library</h1>
+  <div>
+    <button id="darkModeBtn">🌙</button>
+    <button id="logoutBtn">Logout</button>
   </div>
+</div>
+
 
   <!-- Main -->
   <main class="main">
@@ -552,11 +629,21 @@ $(function(){
   // initial refresh
   refreshAll();
 });
-// Mobile pe click karte hi sidebar band ho
+// 🔥 Sidebar Toggle
+$('#menuBtn').click(function(){
+  $('.sidebar').toggleClass('show');
+});
+
+// Mobile auto close
 $('.nav').click(function(){
   if(window.innerWidth < 900){
     $('.sidebar').removeClass('show');
   }
+});
+
+// 🌙 Dark Mode
+$('#darkModeBtn').click(function(){
+  $('body').toggleClass('dark');
 });
 </script>
 </body>
