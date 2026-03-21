@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Library Management</title>
+</head>
+<body>
+  <h1>Library Management System</h1>
+
+  <!-- Login Form -->
+  <h2>Login</h2>
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button type="submit">Login</button>
+  </form>
+  <div id="loginResult"></div>
+
+  <!-- Books List -->
+  <h2>Books</h2>
+  <button id="loadBooks">Load Books</button>
+  <ul id="bookList"></ul>
+
+  <!-- Issue Book -->
+  <h2>Issue Book</h2>
+  <form id="issueForm">
+    <input type="text" id="studentId" placeholder="Student ID">
+    <input type="text" id="bookId" placeholder="Book ID">
+    <button type="submit">Issue</button>
+  </form>
+  <div id="issueResult"></div>
+
+  <!-- Return Book -->
+  <h2>Return Book</h2>
+  <form id="returnForm">
+    <input type="text" id="issueId" placeholder="Issue ID">
+    <button type="submit">Return</button>
+  </form>
+  <div id="returnResult"></div>
+
+  <script>
+    // Login
+    document.getElementById("loginForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("loginResult").innerText = data.message;
+      });
+    });
+
+    // Load Books
+    document.getElementById("loadBooks").addEventListener("click", function(){
+      fetch("http://localhost:5000/books")
+        .then(res => res.json())
+        .then(data => {
+          let output = "";
+          data.forEach(book => {
+            output += `<li>${book.title} - ${book.author}</li>`;
+          });
+          document.getElementById("bookList").innerHTML = output;
+        });
+    });
+
+    // Issue Book
+    document.getElementById("issueForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      fetch("http://localhost:5000/issue/issue", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          studentId: document.getElementById("studentId").value,
+          bookId: document.getElementById("bookId").value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("issueResult").innerText = data.message;
+      });
+    });
+
+    // Return Book
+    document.getElementById("returnForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      fetch("http://localhost:5000/issue/return", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          issueId: document.getElementById("issueId").value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("returnResult").innerText = data.message;
+      });
+    });
+  </script>
+</body>
+</html>
